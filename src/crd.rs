@@ -60,7 +60,7 @@ impl CrdService {
 
         let raw_xml = self.http.execute(req).await?.text().await?;
         println!("{}", raw_xml);
-        let result: CrdResultSet = quick_xml::de::from_str(&*raw_xml)?;
+        let result: CrdResultSet = quick_xml::de::from_str(&raw_xml)?;
 
         Ok(result)
     }

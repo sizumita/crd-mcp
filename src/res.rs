@@ -1,5 +1,5 @@
 use crate::crd::{
-    Bibl, CrdCollectionResult, CrdError, CrdManualResult, CrdProfileResult, CrdReferenceResult,
+    Bibl, CrdCollectionResult, CrdManualResult, CrdProfileResult, CrdReferenceResult,
     CrdResult, CrdResultSet, CrdSystem, CrdSystemWithoutSysId, NdcClass,
 };
 use rmcp::ErrorData;

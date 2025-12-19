@@ -1,4 +1,5 @@
 use crate::req::CrdSearchRequest;
+use crate::res::CrdSearchResponse;
 use rmcp::handler::server::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::{
@@ -34,7 +35,9 @@ impl CrdService {
             .crd_search(request.0)
             .await
             .map_err(|e| ErrorData::internal_error(e.to_string(), None))?;
-        Ok(CallToolResult::structured(serde_json::to_value(k).unwrap()))
+        eprintln!("{:?}", k);
+        let i = Result::<CrdSearchResponse, ErrorData>::from(k)?;
+        Ok(CallToolResult::structured(serde_json::to_value(i).unwrap()))
     }
 }
 
@@ -73,6 +76,52 @@ mod tests {
             results_num: 100,
         };
         let res = service.crd_search(req).await.unwrap();
-        assert!(res.hit_num > 0);
+        assert!(res.hit_num.unwrap() > 0);
+    }
+
+    #[tokio::test]
+    async fn test_crd_lib_search() {
+        let service = super::CrdService::new();
+        let req = super::CrdSearchRequest {
+            ty: ReqType::Profile,
+            condition: Condition {
+                query: Some("lib-name any 長野".to_string()),
+                crt_date_from: None,
+                crt_date_to: None,
+                reg_date_from: None,
+                reg_date_to: None,
+                lst_date_from: None,
+                lst_date_to: None,
+            },
+            lib_id: None,
+            lib_group: None,
+            results_get_position: None,
+            results_num: 100,
+        };
+        let res = service.crd_search(req).await.unwrap();
+        assert!(res.hit_num.unwrap() > 0);
+    }
+
+    #[tokio::test]
+    async fn test_crd_search_err() {
+        let service = super::CrdService::new();
+        let req = super::CrdSearchRequest {
+            ty: ReqType::Reference,
+            condition: Condition {
+                query: Some("北海道".to_string()),
+                crt_date_from: None,
+                crt_date_to: None,
+                reg_date_from: None,
+                reg_date_to: None,
+                lst_date_from: None,
+                lst_date_to: None,
+            },
+            lib_id: None,
+            lib_group: None,
+            results_get_position: None,
+            results_num: 100,
+        };
+        let res = service.crd_search(req).await.unwrap();
+        assert!(res.hit_num.is_none());
     }
 }

@@ -59,16 +59,18 @@ impl CrdService {
         eprintln!("{}", req.url());
 
         let raw_xml = self.http.execute(req).await?.text().await?;
+        println!("{}", raw_xml);
         let result: CrdResultSet = quick_xml::de::from_str(&*raw_xml)?;
 
         Ok(result)
     }
 }
 
-#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
+
 pub struct CrdResultSet {
     /// ヒット数
-    pub hit_num: i32,
+    pub hit_num: Option<i32>,
     /// 検索開始位置
     pub results_get_position: i32,
     /// 検索結果返却件数
@@ -82,16 +84,22 @@ pub struct CrdResultSet {
     pub results_cd: i32,
     /// エラー情報リスト
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub error_list: Option<Vec<CrdError>>,
+    pub err_list: Option<Vec<ErrorEntry>>,
     /// レファレンス事例リスト
-    pub result: Vec<ResultEntry>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result: Option<Vec<ResultEntry>>,
 }
 
-#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ResultEntry {
-    // <result> の子要素を順に全部吸う（混在対応の要）
-    #[serde(rename = "$value", default)]
-    items: Vec<CrdResult>,
+    #[serde(rename = "$value")]
+    pub item: CrdResult,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct ErrorEntry {
+    #[serde(rename = "$value")]
+    pub err_item: CrdError,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
@@ -99,7 +107,7 @@ pub struct CrdError {
     /// エラーコード
     ///
     /// エラーコードを格納する。
-    pub err_code: i32,
+    pub err_code: String,
     /// エラーフィールド
     ///
     /// エラーが発生したフィールド（検索リクエストのパラメタ）を表示する。
@@ -111,61 +119,213 @@ pub struct CrdError {
     pub err_msg: String,
 }
 
-#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum CrdResult {
     Reference(#[serde(rename = "$text")] CrdReferenceResult),
-    Manual { url: String },
-    Collection { url: String },
-    Profile { url: String },
+    Manual(#[serde(rename = "$text")] CrdManualResult),
+    Collection(#[serde(rename = "$text")] CrdCollectionResult),
+    Profile(#[serde(rename = "$text")] CrdProfileResult),
 }
 
-#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct CrdReferenceResult {
-    url: String,
-    question: String,
+    pub url: String,
+    pub question: String,
     #[serde(rename = "reg-id")]
-    reg_id: String,
-    answer: String,
+    pub reg_id: String,
+    pub answer: String,
     #[serde(rename = "crt-date", default)]
     // todo: crt-dateは本来は必須項目であるが、存在しないデータがあるためdefaultを付与
-    crt_date: String,
+    pub crt_date: String,
     /// 解決/未解決, 0: 解決, 1: 未解決
-    solution: Option<i8>,
-    #[serde(rename = "keyword", default)]
-    keywords: Vec<String>,
-    #[serde(default)]
-    classes: Vec<NdcClass>,
+    pub solution: Option<i8>,
+    #[serde(rename = "keyword")]
+    pub keywords: Option<Vec<String>>,
+    pub classes: Option<Vec<NdcClass>>,
     /// 調査種別
     ///
     /// 「文献紹介」「事実調査」「書誌的事項調査」「所蔵調査」「所蔵機関調査」「利用案内」「その他」または任意の文字列
     #[serde(rename = "res-type", skip_serializing_if = "Option::is_none")]
-    res_type: Option<String>,
+    pub res_type: Option<String>,
     /// 内容種別
     ///
     /// 「郷土」「人物」「言葉」「地名」または任意の文字列
     #[serde(rename = "con-type", skip_serializing_if = "Option::is_none")]
-    con_type: Option<String>,
-    #[serde(rename = "bibl", default)]
-    bibls: Vec<Bibl>,
+    pub con_type: Option<String>,
+    #[serde(rename = "bibl")]
+    pub bibls: Option<Vec<Bibl>>,
     /// 回答プロセス
     #[serde(rename = "ans-proc", skip_serializing_if = "Option::is_none")]
-    ans_proc: Option<String>,
+    pub ans_proc: Option<String>,
     /// 照会先
-    #[serde(rename = "referral", default)]
-    referrals: Vec<String>,
+    #[serde(rename = "referral")]
+    pub referrals: Option<Vec<String>>,
+    /// 事前調査事項
     #[serde(rename = "pre-res", skip_serializing_if = "Option::is_none")]
-    pre_res: Option<String>,
+    pub pre_res: Option<String>,
     /// 備考
-    note: Option<String>,
+    pub note: Option<String>,
     /// 質問者区分
     #[serde(rename = "ptn-type", skip_serializing_if = "Option::is_none")]
-    ptn_type: Option<String>,
+    pub ptn_type: Option<String>,
     /// 寄与者
-    #[serde(default)]
-    contri: Vec<String>,
+    pub contri: Option<Vec<String>>,
     /// その他の項目(システム管理項目)
-    system: CrdSystem,
+    pub system: CrdSystem,
+}
+
+#[derive(Deserialize, JsonSchema, Debug, Clone)]
+pub struct CrdManualResult {
+    pub url: String,
+    /// 調査テーマ
+    pub theme: String,
+    /// 管理番号
+    #[serde(rename = "reg-id")]
+    pub reg_id: String,
+    /// 調べ方
+    pub guide: String,
+    /// 調べ方作成日
+    #[serde(rename = "crt-date")]
+    pub crt_date: String,
+    /// 完成/未完成, 0: 完成, 1: 未完成
+    pub completion: Option<i8>,
+    #[serde(rename = "keyword")]
+    pub keywords: Option<Vec<String>>,
+    pub classes: Option<Vec<NdcClass>>,
+    #[serde(rename = "bibl")]
+    pub bibls: Option<Vec<Bibl>>,
+    /// 備考
+    pub note: Option<String>,
+    /// その他の項目(システム管理項目)
+    pub system: CrdSystem,
+}
+
+#[derive(Deserialize, JsonSchema, Debug, Clone)]
+pub struct CrdCollectionResult {
+    pub url: String,
+    /// コレクション名
+    #[serde(rename = "col-name")]
+    pub col_name: String,
+    /// コレクション名ヨミ
+    #[serde(rename = "pro_key")]
+    pub pro_key: String,
+    /// 管理番号
+    #[serde(rename = "reg-id")]
+    pub reg_id: String,
+    /// 内容
+    pub outline: String,
+    /// 来歴
+    pub origin: Option<String>,
+    /// 利用条件
+    pub restriction: Option<String>,
+    /// 目録等
+    pub catalog: Option<String>,
+    /// 紹介文献
+    pub literature: Option<String>,
+    /// 所蔵点数
+    pub number: Option<String>,
+    /// 継続
+    ///
+    /// 0（継続有）, 1（継続無）
+    pub r#continue: Option<String>,
+    #[serde(rename = "keyword")]
+    pub keywords: Option<Vec<String>>,
+    pub classes: Option<Vec<NdcClass>>,
+    /// 備考
+    pub note: Option<String>,
+    /// その他の項目(システム管理項目)
+    pub system: CrdSystem,
+}
+
+#[derive(Deserialize, JsonSchema, Debug, Clone)]
+pub struct CrdProfileResult {
+    pub url: String,
+    /// 館種コード
+    #[serde(rename = "lib-type")]
+    pub ty: String,
+    /// 図書館名（正式）
+    #[serde(rename = "lib-name")]
+    pub name: String,
+    /// 図書館名（略式）
+    pub abbr: String,
+    /// 図書館名ヨミ
+    #[serde(rename = "pro-key")]
+    pub pro_key: String,
+    /// 郵便番号
+    #[serde(rename = "zip-code")]
+    pub zip_code: String,
+    /// 住所（都道府県）
+    #[serde(rename = "add-pref")]
+    pub add_pref: String,
+    /// 住所（市区町村）
+    #[serde(rename = "add-city")]
+    pub add_city: String,
+    /// 住所（丁目・番地）
+    #[serde(rename = "add-street")]
+    pub add_street: String,
+    /// 電話番号１
+    pub tel1: String,
+    /// 電話番号１（追加情報）
+    #[serde(rename = "tel1-note")]
+    pub tel1_note: Option<String>,
+    /// 電話番号２
+    pub tel2: Option<String>,
+    /// 電話番号２（追加情報）
+    #[serde(rename = "tel2-note")]
+    pub tel2_note: Option<String>,
+    /// 電話番号３
+    pub tel3: Option<String>,
+    /// 電話番号３（追加情報）
+    #[serde(rename = "tel3-note")]
+    pub tel3_note: Option<String>,
+    /// FAX番号
+    pub fax: Option<String>,
+    /// e-mailアドレス
+    #[serde(rename = "e-mail")]
+    pub e_mail: Option<String>,
+    /// 図書館URL
+    #[serde(rename = "lib-url")]
+    pub lib_url: Option<String>,
+    /// 開館情報
+    #[serde(rename = "open-info")]
+    pub open_info: Option<String>,
+    /// 利用条件
+    pub restriction: Option<String>,
+    /// 沿革
+    pub outline: Option<String>,
+    /// 特色
+    pub feature: Option<String>,
+    /// 注意事項
+    pub notes: Option<String>,
+    /// 交通案内
+    pub access: Option<String>,
+    /// ISIL
+    pub isil: Option<String>,
+    /// その他の項目(システム管理項目)
+    pub system: CrdSystemWithoutSysId,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]
+pub struct CrdSystemWithoutSysId {
+    /// 登録日時
+    #[serde(rename = "reg-date")]
+    pub reg_date: String,
+    /// 最終更新日時
+    #[serde(rename = "lst-date")]
+    pub lst_date: String,
+    /// 提供館コード
+    #[serde(rename = "lib-id")]
+    pub lib_id: String,
+    /// 提供館名
+    #[serde(rename = "lib-name")]
+    pub lib_name: String,
+    /// 関連ファイル数
+    ///
+    /// 関連ファイルの登録がある場合は登録数を表示する。
+    /// 登録がない場合は「0」を返却する。
+    #[serde(rename = "file-num")]
+    pub file_num: i32,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema, Debug, Clone)]

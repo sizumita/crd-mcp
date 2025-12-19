@@ -147,22 +147,22 @@ pub struct Condition {
     ///   - `question any 本 音楽 and solution = 0`
     #[serde(skip_serializing_if = "Option::is_none")]
     pub query: Option<String>,
-    /// 事例作成日FROM
+    /// 事例作成日FROM。YYYYMMDDで指定。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub crt_date_from: Option<String>,
-    /// 事例作成日TO
+    /// 事例作成日TO。YYYYMMDDで指定。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub crt_date_to: Option<String>,
-    /// 登録日FROM
+    /// 登録日FROM。YYYYMMDDで指定。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reg_date_from: Option<String>,
-    /// 登録日TO
+    /// 登録日TO。YYYYMMDDで指定。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reg_date_to: Option<String>,
-    /// 最終更新日FROM
+    /// 最終更新日FROM。YYYYMMDDで指定。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lst_date_from: Option<String>,
-    /// 最終更新日TO
+    /// 最終更新日TO。YYYYMMDDで指定。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lst_date_to: Option<String>,
 }

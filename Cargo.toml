@@ -3,6 +3,9 @@ name = "crd-mcp"
 description = "国立国会図書館 レファレンス協同データベースシステム(CRD)の検索を行うMCP"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+repository = "https://github.com/sizumita/crd-mcp"
+readme = "README.md"
 
 [dependencies]
 rmcp = { version = "0.12.0", features = ["server", "schemars"] }
@@ -15,4 +18,3 @@ tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 reqwest = {version = "0.12.26", features = ["json"]}
 quick-xml = {version = "0.38.4", features = ["serde", "serialize"]}
-urlencoding = "2.1.3"

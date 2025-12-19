@@ -56,7 +56,7 @@ mod tests {
     async fn test_crd_search() {
         let service = super::CrdService::new();
         let req = super::CrdSearchRequest {
-            ty: Some(ReqType::Reference),
+            ty: ReqType::Reference,
             condition: Condition {
                 query: Some("question any 北海道".to_string()),
                 crt_date_from: None,

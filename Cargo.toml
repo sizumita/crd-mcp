@@ -1,6 +1,6 @@
 [package]
 name = "crd-mcp"
-description = "国立国会図書館 レファレンス協同データベースシステムの検索を行うMCP"
+description = "国立国会図書館 レファレンス協同データベースシステム(CRD)の検索を行うMCP"
 version = "0.1.0"
 edition = "2024"
 

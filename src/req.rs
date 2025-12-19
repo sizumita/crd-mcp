@@ -7,9 +7,9 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct CrdSearchRequest {
-    /// 検索対象を設定する。設定しない場合は全てを対象とする
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub ty: Option<ReqType>,
+    /// 検索対象を設定する。
+    #[serde(rename = "type")]
+    pub ty: ReqType,
     #[serde(flatten)]
     pub condition: Condition,
     /// 提供館コード

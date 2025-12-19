@@ -13,10 +13,7 @@ impl CrdService {
             lib_id,
             lib_group,
         } = request;
-        let mut queries = vec![];
-        if let Some(ty) = ty {
-            queries.push(("type", ty.to_string()));
-        }
+        let mut queries = vec![("type", ty.to_string())];
         if let Some(query) = &condition.query {
             queries.push(("query", query.to_string()));
         }

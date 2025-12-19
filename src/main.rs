@@ -1,6 +1,7 @@
 use rmcp::ServiceExt;
 use tokio::io::{stdin, stdout};
 
+mod crd;
 mod req;
 mod res;
 mod service;

@@ -1,5 +1,4 @@
 use crate::req::CrdSearchRequest;
-use crate::res::{CrdReferenceResult, CrdResult};
 use rmcp::handler::server::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::{
@@ -24,7 +23,9 @@ impl CrdService {
 
 #[tool_router]
 impl CrdService {
-    #[tool(description = "レファレンス協同データベースシステムを検索する。")]
+    #[tool(
+        description = "レファレンス協同データベースシステム(CRD)を検索する。各データを表示する際は、提供館名も明示してください。"
+    )]
     pub async fn search(
         &self,
         request: Parameters<CrdSearchRequest>,
@@ -68,6 +69,8 @@ mod tests {
             },
             lib_id: None,
             lib_group: None,
+            results_get_position: None,
+            results_num: 100,
         };
         let res = service.crd_search(req).await.unwrap();
         assert!(res.hit_num > 0);

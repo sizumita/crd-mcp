@@ -5,6 +5,10 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
+fn default_results_num() -> i8 {
+    100
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 pub struct CrdSearchRequest {
     /// 検索対象を設定する。
@@ -21,6 +25,17 @@ pub struct CrdSearchRequest {
     /// 指定がない場合は全ての館から検索を行う。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lib_group: Option<LibGroup>,
+    /// 検索結果取得位置
+    ///
+    /// 検索結果の取得開始位置を0からのインデックスで指定する。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub results_get_position: Option<i32>,
+    /// 検索結果返却件数
+    ///
+    /// contextの圧迫の制限のため、最大100件まで。デフォルトは100件。
+    #[serde(default = "default_results_num")]
+    #[schemars(range(min = 0, max = 100))]
+    pub results_num: i8,
 }
 
 /// 検索対象

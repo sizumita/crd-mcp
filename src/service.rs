@@ -35,7 +35,6 @@ impl CrdService {
             .crd_search(request.0)
             .await
             .map_err(|e| ErrorData::internal_error(e.to_string(), None))?;
-        eprintln!("{:?}", k);
         let i = Result::<CrdSearchResponse, ErrorData>::from(k)?;
         Ok(CallToolResult::structured(serde_json::to_value(i).unwrap()))
     }

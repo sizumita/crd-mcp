@@ -1,7 +1,7 @@
 [package]
 name = "crd-mcp"
 description = "国立国会図書館 レファレンス協同データベースシステム(CRD)の検索を行うMCP"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "Apache-2.0 AND MIT"
 repository = "https://github.com/sizumita/crd-mcp"

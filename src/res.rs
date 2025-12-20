@@ -1,6 +1,6 @@
 use crate::crd::{
-    Bibl, CrdCollectionResult, CrdManualResult, CrdProfileResult, CrdReferenceResult,
-    CrdResult, CrdResultSet, CrdSystem, CrdSystemWithoutSysId, NdcClass,
+    Bibl, CrdCollectionResult, CrdManualResult, CrdProfileResult, CrdReferenceResult, CrdResult,
+    CrdResultSet, CrdSystem, CrdSystemWithoutSysId, NdcClass,
 };
 use rmcp::ErrorData;
 use schemars::JsonSchema;
@@ -172,7 +172,7 @@ impl From<CrdResultSet> for Result<CrdSearchResponse, ErrorData> {
                 results_returned: value.results_num,
                 results: value
                     .result
-                    .unwrap()
+                    .unwrap_or_default()
                     .into_iter()
                     .map(|x| x.item.into())
                     .collect(),

@@ -123,4 +123,29 @@ mod tests {
         let res = service.crd_search(req).await.unwrap();
         assert!(res.hit_num.is_none());
     }
+
+    #[tokio::test]
+    async fn test_crd_search_no_hit() {
+        let service = super::CrdService::new();
+        let req = super::CrdSearchRequest {
+            ty: ReqType::Reference,
+            condition: Condition {
+                query: Some(
+                    "anywhere = 池袋駅 and anywhere = 雑司が谷 and anywhere = 川".to_string(),
+                ),
+                crt_date_from: None,
+                crt_date_to: None,
+                reg_date_from: None,
+                reg_date_to: None,
+                lst_date_from: None,
+                lst_date_to: None,
+            },
+            lib_id: None,
+            lib_group: None,
+            results_get_position: None,
+            results_num: 10,
+        };
+        let res = service.crd_search(req).await.unwrap();
+        assert_eq!(res.hit_num.unwrap(), 0);
+    }
 }
